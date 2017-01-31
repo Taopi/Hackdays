@@ -34,3 +34,12 @@ names(raw.result)
 raw.result$status_code
 raw.result$request
 raw.result$cookies
+
+# Get list of all channels
+cURL <- "http://services.sg1.dev02.etvt01.sctv.ch/catalog/tv/channels/list/(ids=all;sa=true)"
+raw.result <- GET(cURL)
+this.raw.content <- rawToChar(raw.result$content)
+substr(this.raw.content, 1, 100)
+
+this.content <- fromJSON(this.raw.content)
+this.content[[1]]
