@@ -66,9 +66,8 @@ FreqMat
 
 
 ###############################################################
-api_out$chapterList.subtitleList.clear <- gsub("ã¼", "ü", api_out$chapterList.subtitleList.clear)
-api_out$chapterList.subtitleList.clear <- gsub("ã", "ö", api_out$chapterList.subtitleList.clear)
 corp <- Corpus(VectorSource(api_out$chapterList.subtitleList.clear)) # Create a corpus from the vectors
+####
 #corp <- tm_map(corp, stemDocument, language = "german") # stem words (inactive because I want intakt words)
 corp <- tm_map(corp, removePunctuation) # remove punctuation
 corp <- tm_map(corp, tolower) # convert all words to lower case
@@ -82,12 +81,20 @@ term.matrix <- as.matrix(term.matrix)
 term.matrix <- TermDocumentMatrix(corp)  # crate a term document matrix
 term.matrix <- removeSparseTerms(term.matrix, 0.5) # remove infrequent words
 term.matrix <- as.matrix(term.matrix)
-write.csv2(term.matrix, file = paste0(name,"term.matrix.csv"), row.names = T)
 
+dtm <- term.matrix
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
 
+write.csv2(d, file = paste0(name,"term.matrix.csv"), row.names = T)
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
 
 #### test
-test <- as.data.frame(term.matrix)
+d
 head(as.data.frame(term.matrix))
 names <- colnames(test)
 rownames(d) <- NULL
