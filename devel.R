@@ -9,7 +9,7 @@ for (package in packages) {
 jeopCorpus <- Corpus(VectorSource(api_out$chapterList.subtitleList.clear))
 jeopCorpus <- tm_map(jeopCorpus, PlainTextDocument)
 jeopCorpus <- tm_map(jeopCorpus, removePunctuation)
-jeopCorpus <- tm_map(jeopCorpus, removeWords, stopwords('english'))
+jeopCorpus <- tm_map(jeopCorpus, removeWords, stopwords('german'))
 jeopCorpus <- tm_map(jeopCorpus, stemDocument)
 jeopCorpus <- tm_map(jeopCorpus, removeWords, c('the', 'this', stopwords('english')))
 termFreq(jeopCorpus)
@@ -32,20 +32,65 @@ class(lines)
 ### ---- Liste mit Worthäufigkeiten
 x <-api_out$chapterList.subtitleList.clear
 Encoding(x) <- "UTF-8"
-x <- removeWords(x, stopwords("german"))
+x <- Corpus(VectorSource(x))
+x <- tm_map(x, removePunctuation) # remove punctuation
+x <- tm_map(x, tolower) # convert all words to lower case
+x <- tm_map(x, removeNumbers) # remove all numerals
+x <- tm_map(x, function(x)removeWords(x, stopwords("german"))) # remove grammatical words such as "ein", "ist", "war", etc.
+
+
+x <- removeWords(x
+                 , c(".",","," ","Sie","                                                      "
+                     , stopwords("german")))
 x <- gsub("\n"," ",x)
 x <- gsub("-->"," ",x)
+x <- gsub("-"," ",x)
+
 x <- strsplit(x, " ")
 x <- unlist(x)
 x <- as.factor(x)
+View(x)
 table(x)
 levels(x)
-sapply()
 summary(x)
+wordcloud(x)
 
-
-myTdm <- TermDocumentMatrix(as.factor(api_out$chapterList.subtitleList.clear))
+myTdm <- TermDocumentMatrix(x)
 temp <- inspect(myTdm)
 FreqMat <- data.frame(ST = rownames(temp), Freq = rowSums(temp))
 row.names(FreqMat) <- NULL
 FreqMat
+
+
+###### 
+
+
+###############################################################
+api_out$chapterList.subtitleList.clear <- gsub("ã¼", "ü", api_out$chapterList.subtitleList.clear)
+api_out$chapterList.subtitleList.clear <- gsub("ã", "ö", api_out$chapterList.subtitleList.clear)
+corp <- Corpus(VectorSource(api_out$chapterList.subtitleList.clear)) # Create a corpus from the vectors
+#corp <- tm_map(corp, stemDocument, language = "german") # stem words (inactive because I want intakt words)
+corp <- tm_map(corp, removePunctuation) # remove punctuation
+corp <- tm_map(corp, tolower) # convert all words to lower case
+corp <- tm_map(corp, removeNumbers) # remove all numerals
+corp <- tm_map(corp, function(x)removeWords(x, c("dass" ,stopwords("german")))) # remove grammatical words
+corp <- Corpus(VectorSource(corp$content))  # convert vectors back into a corpus
+term.matrix <- TermDocumentMatrix(corp)  # crate a term document matrix
+term.matrix <- removeSparseTerms(term.matrix, 0.5) # remove infrequent words
+term.matrix <- as.matrix(term.matrix)
+# Create a term document matrix
+term.matrix <- TermDocumentMatrix(corp)  # crate a term document matrix
+term.matrix <- removeSparseTerms(term.matrix, 0.5) # remove infrequent words
+term.matrix <- as.matrix(term.matrix)
+write.csv2(term.matrix, file = paste0(name,"term.matrix.csv"), row.names = T)
+
+
+
+#### test
+test <- as.data.frame(term.matrix)
+head(as.data.frame(term.matrix))
+names <- colnames(test)
+rownames(d) <- NULL
+data <- cbind(names,d)
+test <- test[order(test$`1`, decreasing = T),]
+test

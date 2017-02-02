@@ -38,3 +38,33 @@ api_out$chapterList.subtitleList <- api_out$chapterList.subtitleList.clear
 outlist <- which(names(api_out) %in%c("chapterList.subtitleList","chapterList.resourceList","chapterList.analyticsData"))
 write.csv(api_out[,-outlist], file = name, row.names = FALSE)
 
+
+
+#### ---- Wordcloud aus Subtitles 
+###############################################################
+corp <- Corpus(VectorSource(api_out$chapterList.subtitleList.clear)) # Create a corpus from the vectors
+####
+#corp <- tm_map(corp, stemDocument, language = "german") # stem words (inactive because I want intakt words)
+corp <- tm_map(corp, removePunctuation) # remove punctuation
+corp <- tm_map(corp, tolower) # convert all words to lower case
+corp <- tm_map(corp, removeNumbers) # remove all numerals
+corp <- tm_map(corp, function(x)removeWords(x, c("dass" ,stopwords("german")))) # remove grammatical words
+corp <- Corpus(VectorSource(corp$content))  # convert vectors back into a corpus
+term.matrix <- TermDocumentMatrix(corp)  # crate a term document matrix
+term.matrix <- removeSparseTerms(term.matrix, 0.5) # remove infrequent words
+term.matrix <- as.matrix(term.matrix)
+# Create a term document matrix
+term.matrix <- TermDocumentMatrix(corp)  # crate a term document matrix
+term.matrix <- removeSparseTerms(term.matrix, 0.5) # remove infrequent words
+term.matrix <- as.matrix(term.matrix)
+
+dtm <- term.matrix
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+write.csv2(d, file = paste0(name,"term.matrix.csv"), row.names = T)
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
