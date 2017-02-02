@@ -30,16 +30,8 @@ metadataGETtoDataFrame <- function(cURL) {
   this.content.df  <- as.data.frame(this.content)
 }
 
-# Anwendung: 
-# Aus API App: 
-cURL <- "http://srgssr-prod.apigee.net/rts-archives-public-api/archives?apikey=O7lSaGGuhqBcLNB4yPFmnZiT26bfFN4r"
-api_out <- GETtoDataFrame(cURL = cURL)
-api_out[1,]
-
-
-### Metadaten zu Markus nutzung
-# 0 Start & End & Sender ID holen 
-# ???? 
+# Metadaten aus API 
+# FEHLT: für MArkus: Start & End & Sender <- daraus Sendungs ID ermitten ID holen ???? 
 
 # 1. loop für Ids schreiben
 # Dazu vector wie der hier 
@@ -47,15 +39,13 @@ VideoId <- as.data.frame("df616c07-2b34-4d29-9f03-a2b00c990aba")
 
 # und dann loop über VideoId
 VideoId <- as.data.frame("5297e7ec-a028-47b0-a83d-8461fd8f2b18")
+VideoId <- as.data.frame("ef97fb4a-8ed4-4fa6-807b-75191bcab5fc")
 endpoint <- "http://srgssr-prod.apigee.net/integrationlayer/2.0/srf/mediaComposition/video/"
 apikey <- "O7lSaGGuhqBcLNB4yPFmnZiT26bfFN4r"
 cURL <- paste0(endpoint , VideoId , "?apikey=", apikey)
 api_out <- metadataGETtoDataFrame(cURL = cURL)
-names(api_out)
-# z.B. Subtitles
-# evaluate input and convert to text
-txt <- unlist(api_out$chapterList.subtitleList)[1]
-api_out$chapterList.subtitleList <- getURL(txt)
+# call Subtitles from URL 
+api_out$chapterList.subtitleList.clear <- getURL(unlist(api_out$chapterList.subtitleList)[1])
 
 ### für die gleiche ID noch die Subtitles holen
 cURL <- paste0(endpoint , VideoId , "?apikey=", apikey)
