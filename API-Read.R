@@ -33,8 +33,8 @@ api_out <- metadataGETtoDataFrame(cURL = cURL)
 name <- api_out$episode.title
 name <- paste0(gsub(" ","",name),".csv")
 # call Subtitles from URL
-api_out$chapterList.subtitleList.clear <- getURL(unlist(api_out$chapterList.subtitleList)[1])
-api_out$chapterList.subtitleList <- api_out$chapterList.subtitleList.clear
+api_out$chapterList.subtitleList.clear <- getURLContent(unlist(api_out$chapterList.subtitleList)[1])
+#api_out$chapterList.subtitleList <- api_out$chapterList.subtitleList.clear
 outlist <- which(names(api_out) %in%c("chapterList.subtitleList","chapterList.resourceList","chapterList.analyticsData"))
 write.csv(api_out[,-outlist], file = name, row.names = FALSE)
 
@@ -62,9 +62,17 @@ dtm <- term.matrix
 m <- as.matrix(dtm)
 v <- sort(rowSums(m),decreasing=TRUE)
 d <- data.frame(word = names(v),freq=v)
-
-write.csv2(d, file = paste0(name,"term.matrix.csv"), row.names = T)
+d$emission.start <- api_out$episode.publishedDate
+d$firts.mention.milsec.after.emission.start <- 
+write.csv2(d, file = paste0(name,"term.matrix.csv"), row.names = T, fileEncoding = "UTF-8")
 set.seed(1234)
+
+png(file = "fix.cloud.png", bg = "transparent")
 wordcloud(words = d$word, freq = d$freq, min.freq = 1,
           max.words=200, random.order=FALSE, rot.per=0.35, 
-          colors=brewer.pal(8, "Dark2"))
+          colors=rev(brewer.pal(8, "RdBu")))
+dev.off()
+
+
+write.table(api_out$chapterList.subtitleList.clear, file = "foo.txt", row.names = FALSE)
+

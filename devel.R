@@ -1,3 +1,27 @@
+#### Encoding ändern.. 
+
+api_out$chapterList.subtitleList.clear <- getURLContent(unlist(api_out$chapterList.subtitleList)[1])
+                                                 ,encoding = "UTF-8")
+
+write.table(api_out$chapterList.subtitleList.clear, "test.txt")
+Encoding(api_out$chapterList.subtitleList.clear) <- "latin1"
+
+head(api_out$chapterList.subtitleList.clear)
+
+
+x <- api_out$chapterList.subtitleList.clear
+x <- strsplit(x, "\n")
+x <- unlist(x)
+x <- as.factor(x)
+head(x)
+
+sapply(d$word[1] %in% x)
+
+
+
+
+
+
 packages = c("httr", "jsonlite", "lubridate" , "tm" , "RXKCD" ,"wordcloud" ,"SnowballC") #packete laden: 
 for (package in packages) {
   if (!require(package, character.only = TRUE)) {
@@ -5,16 +29,6 @@ for (package in packages) {
     library(package, character.only = TRUE)
   }
 }
-
-jeopCorpus <- Corpus(VectorSource(api_out$chapterList.subtitleList.clear))
-jeopCorpus <- tm_map(jeopCorpus, PlainTextDocument)
-jeopCorpus <- tm_map(jeopCorpus, removePunctuation)
-jeopCorpus <- tm_map(jeopCorpus, removeWords, stopwords('german'))
-jeopCorpus <- tm_map(jeopCorpus, stemDocument)
-jeopCorpus <- tm_map(jeopCorpus, removeWords, c('the', 'this', stopwords('english')))
-termFreq(jeopCorpus)
-jeopCorpus[[1]]
-wordcloud::wordcloud(jeopCorpus, max.words = 100, random.order = FALSE)
 
 
 ##### -->
